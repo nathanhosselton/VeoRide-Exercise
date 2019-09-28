@@ -1,7 +1,7 @@
 import UIKit
 import MapKit
 
-final class MapViewController: UIViewController {
+final class TripViewController: UIViewController {
     @IBOutlet private weak var mapView: MKMapView!
     @IBOutlet private weak var startButton: UIButton!
 
@@ -35,6 +35,8 @@ final class MapViewController: UIViewController {
 
 }
 
-extension MapViewController: MKMapViewDelegate {
-
+extension TripViewController: MKMapViewDelegate {
+    func mapView(_ mapView: MKMapView, didUpdate userLocation: MKUserLocation) {
+        print(userLocation)
+    }
 }
