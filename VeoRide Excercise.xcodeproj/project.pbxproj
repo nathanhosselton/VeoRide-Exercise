@@ -9,21 +9,21 @@
 /* Begin PBXBuildFile section */
 		0D6582E4233FCA5200DA5600 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D6582E3233FCA5200DA5600 /* AppDelegate.swift */; };
 		0D6582E6233FCA5200DA5600 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D6582E5233FCA5200DA5600 /* SceneDelegate.swift */; };
-		0D6582E8233FCA5200DA5600 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D6582E7233FCA5200DA5600 /* ViewController.swift */; };
 		0D6582EB233FCA5200DA5600 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0D6582E9233FCA5200DA5600 /* Main.storyboard */; };
 		0D6582ED233FCA5400DA5600 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0D6582EC233FCA5400DA5600 /* Assets.xcassets */; };
 		0D6582F0233FCA5400DA5600 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0D6582EE233FCA5400DA5600 /* LaunchScreen.storyboard */; };
+		0D6582F8233FCB8D00DA5600 /* MapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D6582F7233FCB8D00DA5600 /* MapViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		0D6582E0233FCA5200DA5600 /* VeoRide Excercise.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "VeoRide Excercise.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		0D6582E3233FCA5200DA5600 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		0D6582E5233FCA5200DA5600 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
-		0D6582E7233FCA5200DA5600 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		0D6582E3233FCA5200DA5600 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = ../Sources/AppDelegate.swift; sourceTree = "<group>"; };
+		0D6582E5233FCA5200DA5600 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SceneDelegate.swift; path = ../Sources/SceneDelegate.swift; sourceTree = "<group>"; };
 		0D6582EA233FCA5200DA5600 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		0D6582EC233FCA5400DA5600 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		0D6582EF233FCA5400DA5600 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		0D6582F1233FCA5400DA5600 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		0D6582F7233FCB8D00DA5600 /* MapViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = MapViewController.swift; path = Sources/MapViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -56,15 +56,31 @@
 		0D6582E2233FCA5200DA5600 /* VeoRide Excercise */ = {
 			isa = PBXGroup;
 			children = (
+				0D6582F9233FCDE900DA5600 /* App Lifecycle */,
+				0D6582F7233FCB8D00DA5600 /* MapViewController.swift */,
+				0D6582E9233FCA5200DA5600 /* Main.storyboard */,
+				0D6582FA233FCF0200DA5600 /* … */,
+			);
+			path = "VeoRide Excercise";
+			sourceTree = "<group>";
+		};
+		0D6582F9233FCDE900DA5600 /* App Lifecycle */ = {
+			isa = PBXGroup;
+			children = (
 				0D6582E3233FCA5200DA5600 /* AppDelegate.swift */,
 				0D6582E5233FCA5200DA5600 /* SceneDelegate.swift */,
-				0D6582E7233FCA5200DA5600 /* ViewController.swift */,
-				0D6582E9233FCA5200DA5600 /* Main.storyboard */,
+			);
+			path = "App Lifecycle";
+			sourceTree = "<group>";
+		};
+		0D6582FA233FCF0200DA5600 /* … */ = {
+			isa = PBXGroup;
+			children = (
 				0D6582EC233FCA5400DA5600 /* Assets.xcassets */,
 				0D6582EE233FCA5400DA5600 /* LaunchScreen.storyboard */,
 				0D6582F1233FCA5400DA5600 /* Info.plist */,
 			);
-			path = "VeoRide Excercise";
+			name = "…";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -138,8 +154,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				0D6582E8233FCA5200DA5600 /* ViewController.swift in Sources */,
 				0D6582E4233FCA5200DA5600 /* AppDelegate.swift in Sources */,
+				0D6582F8233FCB8D00DA5600 /* MapViewController.swift in Sources */,
 				0D6582E6233FCA5200DA5600 /* SceneDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -287,6 +303,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = GTZ6E2N5Z9;
 				INFOPLIST_FILE = "VeoRide Excercise/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 11.4;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -294,7 +311,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "dev.NathanHosselton.app.iOS.VeoRide-Excercise";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -305,6 +322,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = GTZ6E2N5Z9;
 				INFOPLIST_FILE = "VeoRide Excercise/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 11.4;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -312,7 +330,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "dev.NathanHosselton.app.iOS.VeoRide-Excercise";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};

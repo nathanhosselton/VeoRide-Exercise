@@ -1,13 +1,6 @@
-//
-//  SceneDelegate.swift
-//  VeoRide Excercise
-//
-//  Created by Nathan Hosselton on 9/28/19.
-//  Copyright © 2019 Nathan Hosselton. All rights reserved.
-//
-
 import UIKit
 
+@available(iOS 13.0, *)
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     var window: UIWindow?
