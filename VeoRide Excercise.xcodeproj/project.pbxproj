@@ -13,6 +13,7 @@
 		0D6582ED233FCA5400DA5600 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0D6582EC233FCA5400DA5600 /* Assets.xcassets */; };
 		0D6582F0233FCA5400DA5600 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0D6582EE233FCA5400DA5600 /* LaunchScreen.storyboard */; };
 		0D6582F8233FCB8D00DA5600 /* TripViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D6582F7233FCB8D00DA5600 /* TripViewController.swift */; };
+		0DD887DC233FE80300BEE6A2 /* TripCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DD887DB233FE80300BEE6A2 /* TripCoordinator.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -24,6 +25,7 @@
 		0D6582EF233FCA5400DA5600 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		0D6582F1233FCA5400DA5600 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		0D6582F7233FCB8D00DA5600 /* TripViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = TripViewController.swift; path = Sources/TripViewController.swift; sourceTree = "<group>"; };
+		0DD887DB233FE80300BEE6A2 /* TripCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TripCoordinator.swift; path = Sources/TripCoordinator.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -58,6 +60,7 @@
 			children = (
 				0D6582F9233FCDE900DA5600 /* App Lifecycle */,
 				0D6582F7233FCB8D00DA5600 /* TripViewController.swift */,
+				0DD887DB233FE80300BEE6A2 /* TripCoordinator.swift */,
 				0D6582E9233FCA5200DA5600 /* Main.storyboard */,
 				0D6582FA233FCF0200DA5600 /* … */,
 			);
@@ -155,6 +158,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				0D6582E4233FCA5200DA5600 /* AppDelegate.swift in Sources */,
+				0DD887DC233FE80300BEE6A2 /* TripCoordinator.swift in Sources */,
 				0D6582F8233FCB8D00DA5600 /* TripViewController.swift in Sources */,
 				0D6582E6233FCA5200DA5600 /* SceneDelegate.swift in Sources */,
 			);
