@@ -8,6 +8,9 @@ final class TripViewController: UIViewController {
     /// The object which manages the trip calculating capabilities of this controller.
     private let tripCoordinator = TripCoordinator()
 
+    /// The object encapsulating this controller's state.
+    private var state = State()
+
     override func viewDidLoad() {
         super.viewDidLoad()
         tripCoordinator.delegate = self
@@ -57,12 +60,61 @@ final class TripViewController: UIViewController {
         mapView.removeOverlays(mapView.overlays)
         startButton.isEnabled = false
         //TODO: clear destination pin
+
+        state = State()
+    }
+
+    /// Encapsulates the state and mutation transactions of this controller.
+    struct State {
+        /// A type repesenting the available mutations on this State.
+        enum Mutation {
+            case initialZoom
+            case displayedRoutes([MKRoute])
+            case activeRoute(MKRoute)
+            case navigating(Bool)
+            case userTravelPathPoint(CLLocationCoordinate2D)
+        }
+
+        /// Sets the provided mutation on this object.
+        mutating func set(_ mutation: Mutation) {
+            switch mutation {
+            case .initialZoom:
+                State.hasPerformedInitialZoom = true
+            case .displayedRoutes(let routes):
+                displayedRoutes = routes
+                activeRoute = routes.first
+            case .activeRoute(let route):
+                activeRoute = route
+            case .navigating(let value):
+                isNavigating = value
+            case .userTravelPathPoint(let newPoint):
+                userTravelPath.append(newPoint)
+            }
+        }
+
+        static private var hasPerformedInitialZoom = false
+
+        /// Indicates whether the map has zoomed to the user's location at app launch.
+        var hasPerformedInitialZoom: Bool {
+            State.hasPerformedInitialZoom
+        }
+
+        /// The collection of routes currently displayed on the map. Empty when no routes are displayed.
+        private(set) var displayedRoutes: [MKRoute] = []
+
+        /// The route currently selected by the user. Updates when a new route is selected. Nil when no routes are displayed.
+        private(set) var activeRoute: MKRoute?
+
+        /// Indicates whether the user has begun navigation of the `activeRoute`.
+        private(set) var isNavigating = false
+
+        private(set) var userTravelPath: [CLLocationCoordinate2D] = []
     }
 
     //MARK: UI Constants
 
-    /// The smallest distance the map should be automatically zoomed.
-    private let minimumMapRegionDistance: CLLocationDistance = 1000
+    /// The distance the map should be automatically zoomed when the user is selecting a destination.
+    private let defaultMapRegionDistance: CLLocationDistance = 1000
 
     /// The width of the path drawn to the map for routes to the user's destination.
     private let tripRoutePathWidth: CGFloat = 8
@@ -76,7 +128,10 @@ final class TripViewController: UIViewController {
 
 extension TripViewController: MKMapViewDelegate {
     func mapView(_ mapView: MKMapView, didUpdate userLocation: MKUserLocation) {
-        mapView.setRegion(.init(center: userLocation.coordinate, latitudinalMeters: 0, longitudinalMeters: minimumMapRegionDistance), animated: true)
+        if !state.hasPerformedInitialZoom {
+            mapView.setRegion(.init(center: userLocation.coordinate, latitudinalMeters: 0, longitudinalMeters: defaultMapRegionDistance), animated: true)
+            state.set(.initialZoom)
+        }
     }
 
     func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
@@ -102,6 +157,8 @@ extension TripViewController: TripCoordinatorDelegate {
 
         startButton.isEnabled = true
         //TODO: Remove activity indicator
+
+        state.set(.displayedRoutes(response.routes))
     }
 
     func tripRouteDidFail(with error: Error, in coordinator: TripCoordinator) {
