@@ -27,8 +27,8 @@ final class TripViewController: UIViewController {
 
         let destination = mapView.convert(sender.location(in: mapView), toCoordinateFrom: mapView)
 
-        //TODO: Determine if tap location is within a current route overlay
-        //if it is: select that route for navigation, if not already selected
+        //TODO: Determine if tap location is within an alternate route overlay
+        //if it is: select that route for navigation
         //if it isn't: continue with new trip routing
 
         //TODO: Drop a pin on the destination
@@ -41,24 +41,52 @@ final class TripViewController: UIViewController {
 
     /// Handler for the view's Start button, used for initiating navigation.
     @IBAction private func onStartPressed() {
-        print("Start Pressed")
+        if state.isNavigating {
+            //TODO: End trip, restore button title, color, and enabled state
+            //TODO: Display trip summary (time and distance)
+            //TODO: Zoom map to travel path
+            //TODO: Enable map interaction and remove user tracking
+            //TODO: Remove navigation steps
+            //TODO: reset state
+            return
+        }
 
-        //TODO: Initiate navigation to tapped destination
-        //  - Zoom to appropriate level above path and center on starting point and/or user location
-        //  - Turn on user location tracking
-        //  - Set map to follow user
-        //  - Stretch: Reset to user location/zoom if map is moved by user
-        //  - Begin tracking user's path
-        //  - Display next navigation step and update when reached
-        //  - Draw red overlay over user's traveled path in real time
+        //FIXME: Ensure user location presence ahead of time and/or present an error if nil.
+        guard let userLocation = mapView.userLocation.location else { return }
 
-        //TODO: Convert to cancel button?
+        mapView.setUserTrackingMode(.followWithHeading, animated: true)
+
+        //TODO: Enable user interaction and add zoom/tracking reset button if user breaks tracking
+        mapView.isUserInteractionEnabled = false
+
+        //Remove any routes from the map that aren't the chosen navigation route
+        for case let overlay as MKPolyline in mapView.overlays where overlay != state.activeRoute?.polyline {
+            mapView.removeOverlay(overlay)
+            //TODO: Remove corresponding routes from state.displayedRoutes
+        }
+
+        startButton.setTitle("End", for: .normal)
+        startButton.setTitleColor(.red, for: .normal)
+
+        state.set(.userTravelPathPoint(userLocation.coordinate))
+        state.set(.navigating(true))
+
+        displayNextNavigationStep()
     }
 
-    /// Returns the view to an appropriate state for restarting the trip selection process.
+    private func displayNextNavigationStep() {
+        guard state.isNavigating else { return }
+        //TODO: Display next navigation step and update when reached
+    }
+
+    /// Resets the view to an appropriate state for restarting the trip selection process.
     private func resetViewState() {
         mapView.removeOverlays(mapView.overlays)
+        mapView.isUserInteractionEnabled = true
+        mapView.setUserTrackingMode(.none, animated: false)
         startButton.isEnabled = false
+        startButton.setTitle("Start", for: .normal)
+        startButton.setTitleColor(.blue, for: .normal)
         //TODO: clear destination pin
 
         state = State()
@@ -122,6 +150,9 @@ final class TripViewController: UIViewController {
     /// The color of the path drawn to the map for routes to the user's destination.
     private let tripRoutePathColor: UIColor = .blue
 
+    /// The color of the path drawn to the map for the user's path during navigation.
+    private let tripUserPathColor: UIColor = .red
+
     /// The zoom level relative to the edges of a trip route's rectangle.
     private let tripRouteZoomAmount: CLLocationDegrees = -0.002
 }
@@ -132,6 +163,14 @@ extension TripViewController: MKMapViewDelegate {
             mapView.setRegion(.init(center: userLocation.coordinate, latitudinalMeters: 0, longitudinalMeters: defaultMapRegionDistance), animated: true)
             state.set(.initialZoom)
         }
+
+        if state.isNavigating {
+            //FIXME: Draw a single continuous path using a custom MKOverlay
+            if let lastPoint = state.userTravelPath.last {
+                mapView.addOverlay(MKPolyline(coordinates: [lastPoint, userLocation.coordinate], count: 2))
+            }
+            state.set(.userTravelPathPoint(userLocation.coordinate))
+        }
     }
 
     func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
@@ -139,7 +178,7 @@ extension TripViewController: MKMapViewDelegate {
         case is MKPolyline:
             let renderer = MKPolylineRenderer(overlay: overlay)
             renderer.lineWidth = tripRoutePathWidth
-            renderer.strokeColor = tripRoutePathColor
+            renderer.strokeColor = state.isNavigating ? tripUserPathColor : tripRoutePathColor
             return renderer
         default:
             #if DEBUG
