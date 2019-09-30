@@ -32,29 +32,6 @@ protocol TripCoordinatorDelegate: class {
 /// `TripCoordinatorDelegate` for responding to events.
 final class TripCoordinator: NSObject {
 
-    /// A type for encapsulating errors that may occur while performing trip-related actions.
-    enum Error: Swift.Error, CustomStringConvertible {
-
-        /// Indicates that trip routing concluded without a response or error object and therefore
-        /// no futher information is available.
-        ///
-        /// We hope that Apple has made this impossible, but due to the (Optional, Optional) result
-        /// pattern it is a valid code path that we must handle.
-        case unknownRoutingError
-
-        /// Indicates that the user has explicitely prevented location access for the app and it must be enabled in Settings.
-        case userLocationUsageIsUnavailable
-
-        var description: String {
-            switch self {
-            case .unknownRoutingError:
-                return "\(type(of: self)): An unknown error occurred while executing a directions request and no information was provided."
-            case .userLocationUsageIsUnavailable:
-                return "\(type(of: self)): The user has denied location access and it must be manually enabled in Settings."
-            }
-        }
-    }
-
     /// The delegate to receive event updates from this object.
     ///
     /// Setting this property will immediately invoke the relevant location usage delegate
@@ -150,6 +127,29 @@ final class TripCoordinator: NSObject {
             delegate?.locationUsageUnavailable(in: self)
         default:
             break
+        }
+    }
+
+    /// A type for encapsulating errors that may occur while performing trip-related actions.
+    enum Error: Swift.Error, CustomStringConvertible {
+
+        /// Indicates that trip routing concluded without a response or error object and therefore
+        /// no futher information is available.
+        ///
+        /// We hope that Apple has made this impossible, but due to the (Optional, Optional) result
+        /// pattern it is a valid code path that we must handle.
+        case unknownRoutingError
+
+        /// Indicates that the user has explicitely prevented location access for the app and it must be enabled in Settings.
+        case userLocationUsageIsUnavailable
+
+        var description: String {
+            switch self {
+            case .unknownRoutingError:
+                return "\(type(of: self)): An unknown error occurred while executing a directions request and no information was provided."
+            case .userLocationUsageIsUnavailable:
+                return "\(type(of: self)): The user has denied location access and it must be manually enabled in Settings."
+            }
         }
     }
 }
