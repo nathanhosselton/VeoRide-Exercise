@@ -217,6 +217,10 @@ final class TripViewController: UIViewController {
     /// The distance the map should be automatically zoomed when the user is selecting a destination.
     private let defaultMapRegionDistance: CLLocationDistance = 1000
 
+    /// The distance the map should be automatically zoomed when navigation begins.
+    /// - Note: Currently unused.
+    private let minimumMapRegionDistance: CLLocationDistance = 200
+
     /// The width of the path drawn to the map for routes to the user's destination.
     private let tripRoutePathWidth: CGFloat = 8
 
