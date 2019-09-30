@@ -63,13 +63,6 @@ final class TripCoordinator: NSObject {
         CLLocationManager.authorizationStatus() != .authorizedWhenInUse
     }
 
-    /// Lazily initialzes and configures the location manager object.
-    private lazy var locationManager: CLLocationManager = {
-        let manager = CLLocationManager()
-        manager.delegate = self
-        return manager
-    }()
-
     /// Executes an `MKDirections` request between the provided points and calls the appropriate `TripCoordinatorDelegate`
     /// method upon completion.
     /// - Parameters:
@@ -82,7 +75,7 @@ final class TripCoordinator: NSObject {
         request.transportType = .walking
 
         //TODO: Enable multi-route functionality
-        //Actually we seem to always get alternate routes when walking
+        //Note: Actually we seem to always get alternate routes when walking (edit: perhaps only in simulator?)
         request.requestsAlternateRoutes = false
 
         MKDirections(request: request).calculate {
@@ -103,12 +96,28 @@ final class TripCoordinator: NSObject {
     ///     - zoomLevel: The amount to zoom the generated region. If not specified, the returned region will
     ///     just-enclose the provided routes. Positive values zoom in while negative values zoom out.
     func generateMapRegion(for routes: [MKRoute], zoomLevel: CLLocationDegrees = 0) -> MKCoordinateRegion {
-        let routeRectUnion = routes.reduce(MKMapRect.null) { $0.union($1.polyline.boundingMapRect) }
+        return generateMapRegion(for: routes.map { $0.polyline }, zoomLevel: zoomLevel)
+    }
+
+    /// Returns a map region appropriate for displaying all provided overlays simultaneously with an optional zoom offset.
+    /// - Parameters:
+    ///     - overlays: The overlays to be included in the generated map region.
+    ///     - zoomLevel: The amount to zoom the generated region. If not specified, the returned region will
+    ///     just-enclose the provided overlays. Positive values zoom in while negative values zoom out.
+    func generateMapRegion(for overlays: [MKOverlay], zoomLevel: CLLocationDegrees = 0) -> MKCoordinateRegion {
+        let routeRectUnion = overlays.reduce(MKMapRect.null) { $0.union($1.boundingMapRect) }
         var region = MKCoordinateRegion(routeRectUnion)
         region.span.longitudeDelta -= zoomLevel
         region.span.latitudeDelta -= zoomLevel * 2
         return region
     }
+
+    /// Lazily initialzes and configures the location manager object.
+    private lazy var locationManager: CLLocationManager = {
+        let manager = CLLocationManager()
+        manager.delegate = self
+        return manager
+    }()
 
     /// Immediately notifies the delegate via the corresponding delegate method if the user has either
     /// not yet authorized or explicitly denied location usage for the app.
