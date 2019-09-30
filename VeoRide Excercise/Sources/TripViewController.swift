@@ -20,7 +20,7 @@ final class TripViewController: UIViewController {
     /// Handler for the map view's tap gesture recognizer, used to determine the map location of the user's tap
     /// and kickoff trip routing.
     @IBAction private func onMapTapped(sender: UITapGestureRecognizer) {
-        guard sender.state == .ended else { return }
+        guard !state.pendingUserClear, sender.state == .ended else { return }
 
         //FIXME: Ensure user location presence ahead of time and/or present an error if nil.
         guard let userLocation = mapView.userLocation.location else { return }
@@ -28,7 +28,7 @@ final class TripViewController: UIViewController {
         let destination = mapView.convert(sender.location(in: mapView), toCoordinateFrom: mapView)
 
         //TODO: Determine if tap location is within an alternate route overlay
-        //if it is: select that route for navigation
+        //if it is: select that route for navigation, recoloring inactive routes gray
         //if it isn't: continue with new trip routing
 
         //TODO: Drop a pin on the destination
@@ -41,16 +41,30 @@ final class TripViewController: UIViewController {
 
     /// Handler for the view's Start button, used for initiating navigation.
     @IBAction private func onStartPressed() {
-        if state.isNavigating {
-            //TODO: End trip, restore button title, color, and enabled state
-            //TODO: Display trip summary (time and distance)
-            //TODO: Zoom map to travel path
-            //TODO: Enable map interaction and remove user tracking
-            //TODO: Remove navigation steps
-            //TODO: reset state
-            return
+        //FIXME: This button is overly responsible.
+        if state.pendingUserClear {
+            resetViewState()
+        } else if state.isNavigating {
+            endNavigation()
+        } else {
+            beginNavigation()
         }
+    }
 
+    /// Ends the navigation process and cleans up state.
+    private func endNavigation() {
+        state.set(.navigating(false))
+
+        mapView.setUserTrackingMode(.none, animated: false)
+        mapView.setRegion(tripCoordinator.generateMapRegion(for: mapView.overlays, zoomLevel: tripRouteZoomAmount), animated: true)
+
+        displayTripSummary(distance: tripCoordinator.calculateDistanceTraveled(on: state.userTravelPath), time: state.elapsedTravelTime)
+
+        //TODO: Remove alert and reset state if app is backgrounded while trip summary is displayed
+    }
+
+    /// Initiates the navigation process and updates relevant state.
+    private func beginNavigation() {
         //FIXME: Ensure user location presence ahead of time and/or present an error if nil.
         guard let userLocation = mapView.userLocation.location else { return }
 
@@ -69,14 +83,36 @@ final class TripViewController: UIViewController {
         startButton.setTitleColor(.red, for: .normal)
 
         state.set(.userTravelPathPoint(userLocation.coordinate))
+        state.set(.travelStartTime)
         state.set(.navigating(true))
 
         displayNextNavigationStep()
     }
 
+    /// Displays the next navigation step on screen during navigation.
     private func displayNextNavigationStep() {
         guard state.isNavigating else { return }
-        //TODO: Display next navigation step and update when reached
+        //TODO: Display next navigation step from state.activeRoute and update when reached
+    }
+
+    private func displayTripSummary(distance: CLLocationDistance, time: TimeInterval) {
+        let summary = """
+            Distance Traveled: \(Int(distance))m
+            Travel Time: \(formatTripTime(time))
+            """
+
+        let summaryAlert = UIAlertController(title: "Trip Summary", message: summary, preferredStyle: .alert)
+        summaryAlert.addAction(.init(title: "See Route", style: .cancel) { [weak self] _ in
+            self?.startButton.setTitle("Clear", for: .normal)
+            self?.startButton.setTitleColor(.green, for: .normal)
+            self?.mapView.isUserInteractionEnabled = true
+            self?.state.set(.pendingUserClear)
+        })
+        summaryAlert.addAction(.init(title: "OK", style: .default) { [weak self] _ in
+            self?.resetViewState()
+        })
+
+        present(summaryAlert, animated: true)
     }
 
     /// Resets the view to an appropriate state for restarting the trip selection process.
@@ -84,12 +120,29 @@ final class TripViewController: UIViewController {
         mapView.removeOverlays(mapView.overlays)
         mapView.isUserInteractionEnabled = true
         mapView.setUserTrackingMode(.none, animated: false)
-        startButton.isEnabled = false
+        //TODO: Recenter map on user position
+
         startButton.setTitle("Start", for: .normal)
         startButton.setTitleColor(.blue, for: .normal)
+        startButton.isEnabled = false
+
         //TODO: clear destination pin
+        //TODO: Remove navigation steps
 
         state = State()
+    }
+
+    /// Returns the provided time increment formatted for display to the user.
+    private func formatTripTime(_ time: TimeInterval) -> String {
+        if time < 10 {
+            return "0:0\(Int(time))"
+        } else if time < 60 {
+            return "0:\(Int(time))"
+        } else {
+            let formatter = DateComponentsFormatter()
+            formatter.allowedUnits = [.hour, .minute, .second]
+            return formatter.string(from: time) ?? "0:00"
+        }
     }
 
     /// Encapsulates the state and mutation transactions of this controller.
@@ -184,12 +237,16 @@ extension TripViewController: MKMapViewDelegate {
             state.set(.initialZoom)
         }
 
-        if state.isNavigating {
-            //FIXME: Draw a single continuous path using a custom MKOverlay
-            if let lastPoint = state.userTravelPath.last {
+        if state.isNavigating, let lastPoint = state.userTravelPath.last {
+            let delta = tripCoordinator.calculateDistanceTraveled(on: [lastPoint, userLocation.coordinate])
+
+            //Ignore drift from user location inaccuracy
+            //FIXME: Should use CLLocationManager and check it's accuracy value instead of this arbitrary distance alone
+            if delta > 15 {
+                //FIXME: Draw a single continuous path using a custom MKOverlay
                 mapView.addOverlay(MKPolyline(coordinates: [lastPoint, userLocation.coordinate], count: 2))
+                state.set(.userTravelPathPoint(userLocation.coordinate))
             }
-            state.set(.userTravelPathPoint(userLocation.coordinate))
         }
     }
 

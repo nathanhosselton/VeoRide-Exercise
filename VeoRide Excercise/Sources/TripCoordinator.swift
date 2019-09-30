@@ -112,6 +112,22 @@ final class TripCoordinator: NSObject {
         return region
     }
 
+    /// Calculate the total distance traveled between all points in the provided collection.
+    /// - parameter userPath: The collection of points whose distance should be summed.
+    func calculateDistanceTraveled(on userPath: [CLLocationCoordinate2D]) -> CLLocationDistance {
+        var lastPoint: MKMapPoint?
+        var distances: [CLLocationDistance] = []
+        
+        for point in userPath.map(MKMapPoint.init) {
+            if let lastPoint = lastPoint {
+                distances.append(lastPoint.distance(to: point))
+            }
+            lastPoint = point
+        }
+
+        return distances.reduce(CLLocationDistance(), +)
+    }
+
     /// Lazily initialzes and configures the location manager object.
     private lazy var locationManager: CLLocationManager = {
         let manager = CLLocationManager()
