@@ -110,6 +110,33 @@ final class TripCoordinator: NSObject {
         return distances.reduce(CLLocationDistance(), +)
     }
 
+    /// Returns the last map point (i.e. the ending point) in the provided route step.
+    ///
+    /// May be used for determining the user's remaining distance to their next step.
+    func retrieveEndpoint(from step: MKRoute.Step) -> MKMapPoint? {
+        let stepPointCount = step.polyline.pointCount
+
+        //FIXME: Shouldn't be possible for a line to have no points, but should promote this to an error
+        guard stepPointCount > 0 else { return nil }
+
+        return step.polyline.points()[stepPointCount - 1]
+    }
+
+    /// Detects if the user's position is within an acceptable range of the provided step's end point to consider it reached.
+    /// - Parameters:
+    ///     - coordinate: The user's current location.
+    ///     - step: The route step which the user is currently navigating towards.
+    func userPosition(_ coordinate: CLLocationCoordinate2D, hasReachedStep step: MKRoute.Step) -> Bool {
+        //See FIXME in retrieveEndpoint for comments on this failure condition
+        guard let stepEndPoint = retrieveEndpoint(from: step) else { return false }
+
+        let userMapPoint = MKMapPoint(coordinate)
+
+        //FIXME: Should add detection for having passed the step end point relative to the ending destination
+        //to account for e.g. periods of signal loss
+        return userMapPoint.distance(to: stepEndPoint) < 10
+    }
+
     /// Lazily initialzes and configures the location manager object.
     private lazy var locationManager: CLLocationManager = {
         let manager = CLLocationManager()
