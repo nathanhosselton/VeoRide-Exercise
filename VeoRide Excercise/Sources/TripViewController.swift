@@ -131,7 +131,7 @@ final class TripViewController: UIViewController {
         mapView.removeOverlays(mapView.overlays)
         mapView.isUserInteractionEnabled = true
         mapView.setUserTrackingMode(.none, animated: false)
-        //TODO: Recenter map on user position
+        mapView.setCenter(mapView.userLocation.coordinate, animated: true)
 
         startButton.setTitle("Start", for: .normal)
         startButton.setTitleColor(.blue, for: .normal)
