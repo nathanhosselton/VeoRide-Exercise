@@ -115,6 +115,17 @@ final class TripViewController: UIViewController {
         present(summaryAlert, animated: true)
     }
 
+    /// Formats and displays an error message to the user.
+    private func displayErrorMessage(for error: LocalizedError) {
+        let errorAlert = UIAlertController(title: "Hey there", message: error.errorDescription, preferredStyle: .alert)
+        errorAlert.addAction(.init(title: "OK", style: .cancel))
+
+        //Don't override a more important message, such as the trip summary
+        if presentedViewController == nil {
+            present(errorAlert, animated: true)
+        }
+    }
+
     /// Resets the view to an appropriate state for restarting the trip selection process.
     private func resetViewState() {
         mapView.removeOverlays(mapView.overlays)
@@ -282,8 +293,12 @@ extension TripViewController: TripCoordinatorDelegate {
     }
 
     func tripRouteDidFail(with error: Error, in coordinator: TripCoordinator) {
-        //TODO: Display message to user and reset view state if needed
-        //TODO: Disable Start button if needed
+        switch error {
+        case is LocalizedError:
+            displayErrorMessage(for: error as! LocalizedError)
+        default:
+            displayErrorMessage(for: TripCoordinator.Error.unknownRoutingError)
+        }
     }
 
     func locationUsageAuthorizationRequired(by locationManager: CLLocationManager, in coordinator: TripCoordinator) {
@@ -291,7 +306,7 @@ extension TripViewController: TripCoordinatorDelegate {
     }
 
     func locationUsageUnavailable(in coordinator: TripCoordinator) {
-        //TODO: Inform user they must enable location usage in Settings for app functionality
+        displayErrorMessage(for: TripCoordinator.Error.userLocationUsageIsUnavailable)
     }
 }
 
@@ -301,6 +316,8 @@ extension TripCoordinator.Error: LocalizedError {
         switch self {
         case .unknownRoutingError:
             return "Something went wrong while routing to your destination. Sorry about that. Please try again."
+        case .userLocationUsageIsUnavailable:
+            return "We need to use your location to provide trip routes and navigation. Please go to Settings to enable access."
         }
     }
 }
