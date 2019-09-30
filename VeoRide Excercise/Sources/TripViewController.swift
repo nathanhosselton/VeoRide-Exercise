@@ -101,6 +101,8 @@ final class TripViewController: UIViewController {
             case activeRoute(MKRoute)
             case navigating(Bool)
             case userTravelPathPoint(CLLocationCoordinate2D)
+            case travelStartTime
+            case pendingUserClear
         }
 
         /// Sets the provided mutation on this object.
@@ -117,14 +119,21 @@ final class TripViewController: UIViewController {
                 isNavigating = value
             case .userTravelPathPoint(let newPoint):
                 userTravelPath.append(newPoint)
+            case .travelStartTime:
+                travelStartDate = Date()
+            case .pendingUserClear:
+                pendingUserClear = true
             }
         }
-
-        static private var hasPerformedInitialZoom = false
 
         /// Indicates whether the map has zoomed to the user's location at app launch.
         var hasPerformedInitialZoom: Bool {
             State.hasPerformedInitialZoom
+        }
+
+        /// The amount of time that has elapsed since the user began navigation.
+        var elapsedTravelTime: TimeInterval {
+            abs(travelStartDate?.timeIntervalSinceNow ?? 0)
         }
 
         /// The collection of routes currently displayed on the map. Empty when no routes are displayed.
@@ -136,7 +145,18 @@ final class TripViewController: UIViewController {
         /// Indicates whether the user has begun navigation of the `activeRoute`.
         private(set) var isNavigating = false
 
+        /// The ongoing travel path of the user during navigation.
         private(set) var userTravelPath: [CLLocationCoordinate2D] = []
+
+        /// Indicates that the user has opted to review their completed route and the view must still be reset
+        /// before a new trip can be mapped.
+        private(set) var pendingUserClear = false
+
+        // Internal reference to the point in time when navigation began. Used for generating `elapsedTravelTime`.
+        private var travelStartDate: Date?
+
+        // Internal static reference for whether the initial app launch zoom has been performed.
+        static private var hasPerformedInitialZoom = false
     }
 
     //MARK: UI Constants
