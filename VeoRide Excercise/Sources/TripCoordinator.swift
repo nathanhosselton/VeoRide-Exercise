@@ -13,11 +13,42 @@ protocol TripCoordinatorDelegate: class {
     /// be directed to Settings to enable it.
     /// - Parameter coordinator: The `TripCoordinator` object which needs this access.
     func locationUsageUnavailable(in coordinator: TripCoordinator)
+
+    /// Called when a requested trip route has completed successfully, providing the response.
+    /// - Parameters:
+    ///     - response: The response object containing the route information for display on a map. Guaranteed
+    ///     to contain at least one route.
+    ///     - coordinator: The `TripCoordinator` object on which the route request was initiatied.
+    func tripRouteDidComplete(with response: MKDirections.Response, in coordinator: TripCoordinator)
+
+    /// Called when a requested trip route failed to complete, providing the error.
+    /// - Parameters:
+    ///     - error: The object containing information relating to why the failure occurred, if available.
+    ///     - coordinator: The `TripCoordinator` object on which the route request was initiatied.
+    func tripRouteDidFail(with error: Swift.Error, in coordinator: TripCoordinator)
 }
 
 /// Manages trip calculation functionality (and its prerequisites) on behalf of `TripViewController`. Provides
 /// `TripCoordinatorDelegate` for responding to events.
 final class TripCoordinator: NSObject {
+
+    /// A type for encapsulating errors that may occur while performing trip-related actions.
+    enum Error: Swift.Error, CustomStringConvertible {
+
+        /// Indicates that trip routing concluded without a response or error object and therefore
+        /// no futher information is available.
+        ///
+        /// We hope that Apple has made this impossible, but due to the (Optional, Optional) result
+        /// pattern it is a valid code path that we must handle.
+        case unknownRoutingError
+
+        var description: String {
+            switch self {
+            case .unknownRoutingError:
+                return "\(type(of: self)): An unknown error occurred while executing a directions request and no information was provided."
+            }
+        }
+    }
 
     /// The delegate to receive event updates from this object.
     ///
@@ -38,6 +69,46 @@ final class TripCoordinator: NSObject {
         manager.delegate = self
         return manager
     }()
+
+    /// Executes an `MKDirections` request between the provided points and calls the appropriate `TripCoordinatorDelegate`
+    /// method upon completion.
+    /// - Parameters:
+    ///     - userLocation: The beginning point for the route.
+    ///     - destination: The ending point for the route.
+    func route(from userLocation: CLLocationCoordinate2D, to destination: CLLocationCoordinate2D) {
+        let request = MKDirections.Request()
+        request.source = MKMapItem(placemark: .init(coordinate: userLocation, addressDictionary: nil))
+        request.destination = MKMapItem(placemark: .init(coordinate: destination, addressDictionary: nil))
+        request.transportType = .walking
+
+        //TODO: Enable multi-route functionality
+        //Actually we seem to always get alternate routes when walking
+        request.requestsAlternateRoutes = false
+
+        MKDirections(request: request).calculate {
+            switch ($0, $1) {
+            case (.some(let directions), _) where !directions.routes.isEmpty:
+                self.delegate?.tripRouteDidComplete(with: directions, in: self)
+            case (_, .some(let error)):
+                self.delegate?.tripRouteDidFail(with: error, in: self)
+            default:
+                self.delegate?.tripRouteDidFail(with: Error.unknownRoutingError, in: self)
+            }
+        }
+    }
+
+    /// Returns a map region appropriate for displaying all provided routes simultaneously with an optional zoom offset.
+    /// - Parameters:
+    ///     - routes: The routes to be included in the generated map region.
+    ///     - zoomLevel: The amount to zoom the generated region. If not specified, the returned region will
+    ///     just-enclose the provided routes. Positive values zoom in while negative values zoom out.
+    func generateMapRegion(for routes: [MKRoute], zoomLevel: CLLocationDegrees = 0) -> MKCoordinateRegion {
+        let routeRectUnion = routes.reduce(MKMapRect.null) { $0.union($1.polyline.boundingMapRect) }
+        var region = MKCoordinateRegion(routeRectUnion)
+        region.span.longitudeDelta -= zoomLevel
+        region.span.latitudeDelta -= zoomLevel * 2
+        return region
+    }
 
     /// Immediately notifies the delegate via the corresponding delegate method if the user has either
     /// not yet authorized or explicitly denied location usage for the app.
