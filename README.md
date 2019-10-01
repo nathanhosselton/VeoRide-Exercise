@@ -23,7 +23,7 @@ Along the way I made decisions regarding code organization and clarity, such as 
 Some things I wanted to complete but was unable:
 
 - More robust error handling, such as when user location is lost
-- Allowing the user to select alternate routes (MapKit provides them, but discreet interaction detection is needed)
+- Allowing the user to select alternate routes (MapKit provides them, but discrete interaction detection is needed)
 - Showing the navigation steps (Again, MapKit provides them, but displaying them needs manual detection of reaching each step. Also would need to account for the user changing paths for the experience to be viable.)
 
 I left notes for these and other TODOs/FIXMEs in the relevant parts of the code.
